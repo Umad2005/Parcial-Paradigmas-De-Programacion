@@ -1,0 +1,98 @@
+from mesa import Agent, Model
+from mesa.time import RandomActivation
+from mesa.space import MultiGrid
+from mesa.datacollection import DataCollector
+import re
+
+# Agentes de operaciones
+class AgenteSuma(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def realizar_operacion(self, a, b):
+        return a + b
+
+class AgenteResta(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def realizar_operacion(self, a, b):
+        return a - b
+
+class AgenteMultiplicacion(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def realizar_operacion(self, a, b):
+        return a * b
+
+class AgenteDivision(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def realizar_operacion(self, a, b):
+        return a / b if b != 0 else None
+
+class AgentePotencia(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def realizar_operacion(self, a, b):
+        return a ** b
+
+class AgenteEntradaSalida(Agent):
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+    def procesar_expresion(self, expresion):
+        # Separar números y operadores
+        tokens = re.findall(r'[0-9.]+|[-+*/^]', expresion)
+        return self.calcular(tokens)
+
+    def calcular(self, tokens):
+        # Implementar la lógica de precedencia
+        while len(tokens) > 1:
+            for op in ['^', '*', '/', '+', '-']:
+                while op in tokens:
+                    idx = tokens.index(op)
+                    a = float(tokens[idx - 1])
+                    b = float(tokens[idx + 1])
+                    resultado = self.ejecutar_operacion(op, a, b)
+                    tokens[idx - 1:idx + 2] = [resultado]
+                    break
+        return tokens[0]
+
+    def ejecutar_operacion(self, op, a, b):
+        if op == '+':
+            return self.model.agentes['suma'].realizar_operacion(a, b)
+        elif op == '-':
+            return self.model.agentes['resta'].realizar_operacion(a, b)
+        elif op == '*':
+            return self.model.agentes['multiplicacion'].realizar_operacion(a, b)
+        elif op == '/':
+            return self.model.agentes['division'].realizar_operacion(a, b)
+        elif op == '^':
+            return self.model.agentes['potencia'].realizar_operacion(a, b)
+
+# Esto es el modelo de la calculadora
+class Calculadora(Model):
+    def __init__(self):
+        self.num_agents = 5
+        self.agentes = {
+            'suma': AgenteSuma(1, self),
+            'resta': AgenteResta(2, self),
+            'multiplicacion': AgenteMultiplicacion(3, self),
+            'division': AgenteDivision(4, self),
+            'potencia': AgentePotencia(5, self),
+            'entrada_salida': AgenteEntradaSalida(6, self)
+        }
+
+    def calcular(self, expresion):
+        return self.agentes['entrada_salida'].procesar_expresion(expresion)
+
+# Aca simplemente hacemos uso de la calculadora
+if __name__ == "__main__":
+    calculadora = Calculadora()
+    expresion = input("Ingrese la expresion matematica: ")
+    resultado = calculadora.calcular(expresion)
+    print(f"El resultado de '{expresion}' es: {resultado}")
