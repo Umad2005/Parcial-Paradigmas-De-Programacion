@@ -4,7 +4,7 @@ from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 import re
 
-# Agentes de operaciones
+# Estos son los Agentes de operaciones
 class AgenteSuma(Agent):
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
@@ -74,7 +74,7 @@ class AgenteEntradaSalida(Agent):
         elif op == '^':
             return self.model.agentes['potencia'].realizar_operacion(a, b)
 
-# Esto es el modelo de la calculadora
+# Este es simplemente el modelo de la calculadora
 class Calculadora(Model):
     def __init__(self):
         self.num_agents = 5
